@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_post_list/post_list/post_list.dart';
+import 'package:flutter_post_list/post_list/view/post_list_view.dart';
 
 void main() {
   runApp(const MyApp());

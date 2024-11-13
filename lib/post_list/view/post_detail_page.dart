@@ -1,67 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_post_list/post_list/model/post.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-class PostDetailPage extends StatefulWidget {
+class PostDetailPage extends StatelessWidget {
   const PostDetailPage({
     super.key,
     required this.post,
+    required this.index,
     required this.posts,
-    required this.currentIndex,
+    required this.onRemove,
   });
 
   final Post post;
+  final int index;
   final List<Post> posts;
-  final int currentIndex;
-
-  @override
-  State<PostDetailPage> createState() => _PostDetailPageState();
-}
-
-class _PostDetailPageState extends State<PostDetailPage> {
-  late int currentIndex;
-  late Post currentPost;
-  String? authorName;
-
-  @override
-  void initState() {
-    super.initState();
-    currentIndex = widget.currentIndex;
-    currentPost = widget.post;
-    _fetchAdditionalData();
-  }
-
-  Future<void> _fetchAdditionalData() async {
-    final url = 'https://jsonplaceholder.typicode.com/posts/${currentPost.id}';
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        authorName = data['userId']?.toString(); // Using userId as a placeholder for "author"
-      });
-    }
-  }
-
-  void _loadNextPost() {
-    setState(() {
-      currentIndex = (currentIndex + 1) % widget.posts.length;
-      currentPost = widget.posts[currentIndex];
-      _fetchAdditionalData();
-    });
-  }
-
-  void _loadPreviousPost() {
-    setState(() {
-      currentIndex = (currentIndex - 1 + widget.posts.length) % widget.posts.length;
-      currentPost = widget.posts[currentIndex];
-      _fetchAdditionalData();
-    });
-  }
-
-  void _removeCurrentPost() {
-    Navigator.pop(context, currentIndex); // Pass the index back for removal
-  }
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -71,19 +23,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Display additional data, e.g., author name
-            if (authorName != null)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Author: $authorName',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
-            // Title Container
+            // Container untuk Title
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               padding: const EdgeInsets.all(24.0),
@@ -101,7 +41,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               ),
               child: Center(
                 child: Text(
-                  currentPost.title,
+                  post.title,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -111,7 +51,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 ),
               ),
             ),
-            // Body Container
+            // Container untuk Body
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               padding: const EdgeInsets.all(16.0),
@@ -128,7 +68,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 ],
               ),
               child: Text(
-                currentPost.body,
+                post.body,
                 textAlign: TextAlign.justify,
                 style: TextStyle(
                   color: Colors.grey[600],
@@ -136,18 +76,31 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 ),
               ),
             ),
-            // Navigation Buttons
+            // Tombol Navigasi
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
-                    onPressed: _loadPreviousPost,
+                    onPressed: () {
+                      final prevIndex = index == 0 ? posts.length - 1 : index - 1;
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PostDetailPage(
+                            post: posts[prevIndex],
+                            index: prevIndex,
+                            posts: posts,
+                            onRemove: onRemove,
+                          ),
+                        ),
+                      );
+                    },
                     child: const Text("Previous"),
                   ),
                   ElevatedButton(
-                    onPressed: _removeCurrentPost,
+                    onPressed: onRemove,
                     child: const Text("Remove"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -155,7 +108,20 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: _loadNextPost,
+                    onPressed: () {
+                      final nextIndex = index == posts.length - 1 ? 0 : index + 1;
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PostDetailPage(
+                            post: posts[nextIndex],
+                            index: nextIndex,
+                            posts: posts,
+                            onRemove: onRemove,
+                          ),
+                        ),
+                      );
+                    },
                     child: const Text("Next"),
                   ),
                 ],

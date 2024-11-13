@@ -10,7 +10,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: "Post List",
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       // Enable scroll behavior by other devices on web
       scrollBehavior: const MaterialScrollBehavior().copyWith(
