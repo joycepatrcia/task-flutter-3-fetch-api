@@ -25,9 +25,6 @@ class PostListView extends StatelessWidget {
               itemCount: state.posts.length,
               itemBuilder: (context, index) {
                 final post = state.posts[index];
-                if (post.isHidden) {
-                  return Container(); // Skip rendering the hidden post
-                }
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                   padding: const EdgeInsets.all(16.0),
@@ -65,11 +62,14 @@ class PostListView extends StatelessWidget {
                             currentIndex: index,
                           ),
                         ),
-                      );
+                      ).then((removedIndex) {
+                        if (removedIndex != null) {
+                          context.read<PostListCubit>().removeData(removedIndex);
+                        }
+                      });
                     },
                     onLongPress: () {
-                      // Show a dialog to toggle the post visibility
-                      _showHideConfirmationDialog(context, index);
+                      _showConfirmationDialog(context, index);
                     },
                   ),
                 );
@@ -114,7 +114,7 @@ class PostListView extends StatelessWidget {
   }
 
   // Show confirmation dialog to hide the post
-  void _showHideConfirmationDialog(BuildContext context, int index) {
+  void _showConfirmationDialog(BuildContext context, int index) {
     showDialog(
       context: context,
       builder: (_) {
@@ -130,7 +130,7 @@ class PostListView extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                context.read<PostListCubit>().toggleHidePost(index);
+                context.read<PostListCubit>().removeData(index);
                 Navigator.of(context).pop();
               },
               child: const Text('Hide'),
