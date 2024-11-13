@@ -29,11 +29,14 @@ class PostListCubit extends Cubit<PostListState> {
     }
   }
 
-  void removeData(int index) {
+  void toggleHidePost(int index) {
     if (state is PostListSuccess) {
       final posts = List<Post>.from((state as PostListSuccess).posts);
-      posts.removeAt(index);
-      emit(PostListSuccess(posts));
+      final post = posts[index];
+      post.isHidden = !post.isHidden;  // Toggle the hidden status of the post
+      emit(PostListSuccess(posts));  // Update state with modified list
     }
   }
+
+
 }

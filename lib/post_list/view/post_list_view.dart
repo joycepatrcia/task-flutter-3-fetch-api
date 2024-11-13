@@ -7,13 +7,13 @@ class PostListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 93, 71, 106),
+        backgroundColor: Color.fromARGB(255, 93, 71, 106), // Moderate purple color
         title: const Center(
           child: Text(
             'POST LIST',
             style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontWeight: FontWeight.bold, // Bold title text
+              color: Colors.white, // White color for the text
             ),
           ),
         ),
@@ -25,6 +25,9 @@ class PostListView extends StatelessWidget {
               itemCount: state.posts.length,
               itemBuilder: (context, index) {
                 final post = state.posts[index];
+                if (post.isHidden) {
+                  return Container(); // Skip rendering the hidden post
+                }
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                   padding: const EdgeInsets.all(16.0),
@@ -62,14 +65,11 @@ class PostListView extends StatelessWidget {
                             currentIndex: index,
                           ),
                         ),
-                      ).then((removedIndex) {
-                        if (removedIndex != null) {
-                          context.read<PostListCubit>().removeData(removedIndex);
-                        }
-                      });
+                      );
                     },
                     onLongPress: () {
-                      _showConfirmationDialog(context, index);
+                      // Show a dialog to toggle the post visibility
+                      _showHideConfirmationDialog(context, index);
                     },
                   ),
                 );
@@ -104,6 +104,7 @@ class PostListView extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          // Triggering the refresh of posts when the button is pressed
           context.read<PostListCubit>().fetchPosts();
         },
         child: const Icon(Icons.refresh),
@@ -112,13 +113,14 @@ class PostListView extends StatelessWidget {
     );
   }
 
-  void _showConfirmationDialog(BuildContext context, int index) {
+  // Show confirmation dialog to hide the post
+  void _showHideConfirmationDialog(BuildContext context, int index) {
     showDialog(
       context: context,
       builder: (_) {
         return AlertDialog(
-          title: const Text('Delete Post'),
-          content: const Text('Are you sure you want to delete this post?'),
+          title: const Text('Hide Post'),
+          content: const Text('Are you sure you want to hide this post?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -128,10 +130,10 @@ class PostListView extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                context.read<PostListCubit>().removeData(index);
+                context.read<PostListCubit>().toggleHidePost(index);
                 Navigator.of(context).pop();
               },
-              child: const Text('Remove'),
+              child: const Text('Hide'),
             ),
           ],
         );
